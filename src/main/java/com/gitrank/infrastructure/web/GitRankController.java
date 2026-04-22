@@ -19,12 +19,13 @@ public class GitRankController {
 
     @GetMapping("/{username}")
     @Cacheable(value = "gitrank", key = "#username")
-    public ResponseEntity<GitRankResult> getGitRank(@PathVariable String username) {
+    public ResponseEntity<?> getGitRank(@PathVariable String username) {
         try {
             GitRankResult result = generateScoreUseCase.execute(username);
             return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
         }
     }
 }
