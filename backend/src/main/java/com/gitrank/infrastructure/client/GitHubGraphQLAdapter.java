@@ -7,6 +7,7 @@ import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,10 +38,12 @@ public class GitHubGraphQLAdapter {
                 .block();
     }
 
+    @SuppressWarnings("unchecked")
     private DeveloperProfile mapToDomain(Map<String, Object> userData) {
-        if (userData == null) return new DeveloperProfile("Desconhecido", List.of());
+        if (userData == null) return new DeveloperProfile("Desconhecido", "Desconhecido", List.of());
 
         String login = (String) userData.get("login");
+        String createdAt = (String) userData.get("createdAt");
         Map<String, Object> repositories = (Map<String, Object>) userData.get("repositories");
         List<Map<String, Object>> nodes = (List<Map<String, Object>>) repositories.get("nodes");
 
@@ -49,7 +52,7 @@ public class GitHubGraphQLAdapter {
             boolean hasDescription = node.get("description") != null;
 
             Map<String, Object> topicsMap = (Map<String, Object>) node.get("repositoryTopics");
-            int topicCount = (int) topicsMap.get("totalCount");
+            int topicCount = topicsMap != null && topicsMap.get("totalCount") != null ? (int) topicsMap.get("totalCount") : 0;
 
             String readme = "";
             Map<String, Object> objectMap = (Map<String, Object>) node.get("object");
@@ -62,12 +65,34 @@ public class GitHubGraphQLAdapter {
             if (branchMap != null) {
                 Map<String, Object> targetMap = (Map<String, Object>) branchMap.get("target");
                 Map<String, Object> historyMap = (Map<String, Object>) targetMap.get("history");
-                commits = (int) historyMap.get("totalCount");
+                if (historyMap != null && historyMap.get("totalCount") != null) {
+                    commits = (int) historyMap.get("totalCount");
+                }
             }
 
-            return new RepositoryData(name, false, hasDescription, topicCount, readme, commits);
+            Map<String, Long> languagesMap = new HashMap<>();
+            Map<String, Object> langsData = (Map<String, Object>) node.get("languages");
+            if (langsData != null) {
+                List<Map<String, Object>> edges = (List<Map<String, Object>>) langsData.get("edges");
+                if (edges != null) {
+                    for (Map<String, Object> edge : edges) {
+                        Number sizeNum = (Number) edge.get("size");
+                        long size = sizeNum != null ? sizeNum.longValue() : 0L;
+                        
+                        Map<String, Object> langNode = (Map<String, Object>) edge.get("node");
+                        if (langNode != null) {
+                            String langName = (String) langNode.get("name");
+                            if (langName != null) {
+                                languagesMap.put(langName, size);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new RepositoryData(name, false, hasDescription, topicCount, readme, commits, languagesMap);
         }).toList();
 
-        return new DeveloperProfile(login, repos);
+        return new DeveloperProfile(login, createdAt, repos);
     }
 }

@@ -1,10 +1,13 @@
 package com.gitrank.domain.model;
 
+import java.util.Map;
+
 public record RepositoryData(
         String name,
         boolean isFork,
         boolean hasDescription,
         int topicCount,
         String readmeContent,
-        int totalCommits
+        int totalCommits,
+        Map<String, Long> languages
 ) {}

@@ -1,22 +1,23 @@
 query getUserGitRankData($username: String!) {
   user(login: $username) {
-    login
-
-    repositories(first: 50, isFork: false, orderBy: {field: PUSHED_AT, direction: DESC}) {
+    createdAt
+    repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: UPDATED_AT, direction: DESC}) {
       nodes {
         name
+        isFork
         description
-
-        repositoryTopics(first: 1) {
+        stargazerCount
+        repositoryTopics(first: 10) {
           totalCount
         }
-
-        object(expression: "HEAD:README.md") {
-          ... on Blob {
-            text
+        languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+          edges {
+            size
+            node {
+              name
+            }
           }
         }
-
         defaultBranchRef {
           target {
             ... on Commit {
@@ -24,6 +25,11 @@ query getUserGitRankData($username: String!) {
                 totalCount
               }
             }
+          }
+        }
+        object(expression: "HEAD:README.md") {
+          ... on Blob {
+            text
           }
         }
       }

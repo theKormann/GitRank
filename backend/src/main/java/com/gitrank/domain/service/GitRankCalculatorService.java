@@ -6,7 +6,10 @@ import com.gitrank.domain.model.RepositoryData;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class GitRankCalculatorService {
@@ -22,7 +25,10 @@ public class GitRankCalculatorService {
                     "Inativo", 
                     List.of("Nenhum repositório original público encontrado."),
                     "Não foi possível gerar um resumo, pois não existem repositórios originais na conta.",
-                    0, 0, 0 
+                    0, 0, 0,
+                    List.of(),
+                    Map.of(),
+                    "Desconhecido"
             );
         }
 
@@ -30,6 +36,7 @@ public class GitRankCalculatorService {
         int totalCommits = 0;
         
         List<String> insights = new ArrayList<>();
+        Map<String, Long> langByteCount = new HashMap<>();
 
         for (RepositoryData repo : originalRepos) {
             totalScore += calculateDocumentationScore(repo);
@@ -37,6 +44,12 @@ public class GitRankCalculatorService {
             totalScore += calculateActivityScore(repo);
             
             totalCommits += repo.totalCommits();
+
+            if (repo.languages() != null) {
+                repo.languages().forEach((name, size) -> {
+                    langByteCount.put(name, langByteCount.getOrDefault(name, 0L) + size);
+                });
+            }
         }
 
         int finalScore = (int) Math.round(totalScore / originalRepos.size());
@@ -53,14 +66,34 @@ public class GitRankCalculatorService {
             finalScore >= 60 ? "Demonstra um cuidado excelente com a organização, aplicando descrições claras e boa documentação." : "A análise encontrou espaço para melhorar a documentação técnica (README) dos seus projetos principais."
         );
 
+        List<String> badges = new ArrayList<>();
+        if (finalScore >= 85) badges.add("🏆 Desenvolvedor Excepcional");
+        if (originalRepos.size() >= 10) badges.add("📦 Criador Prolífico");
+        if (totalCommits >= 50) badges.add("🔥 Máquina de Commits");
+
+        long totalBytes = langByteCount.values().stream().mapToLong(Long::longValue).sum();
+        
+        Map<String, Double> languagePercentages = totalBytes > 0 ? langByteCount.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> Math.round((entry.getValue() * 100.0 / totalBytes) * 10.0) / 10.0
+            )) : Map.of();
+
+        String memberSince = profile.createdAt() != null && profile.createdAt().length() >= 4 
+            ? profile.createdAt().substring(0, 4) 
+            : "Desconhecido";
+
         return new GitRankResult(
                 finalScore,
                 level,
                 insights,
                 summary,
                 originalRepos.size(),
-                0, // Substitua pela soma real de estrelas se a tiver mapeada no RepositoryData
-                totalCommits
+                0, 
+                totalCommits,
+                badges,
+                languagePercentages,
+                memberSince
         );
     }
 
