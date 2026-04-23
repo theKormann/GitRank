@@ -47,18 +47,26 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 }
 
 async function getScore(username: string): Promise<GitRankResult | null> {
+  const apiUrl = process.env.API_URL || 'http://127.0.0.1:8080';
   try {
-    const res = await fetch(`http://127.0.0.1:8080/api/v1/gitrank/${username}`, {
+    const res = await fetch(`${apiUrl}/api/v1/gitrank/${username}`, {
       cache: 'no-store'
     });
-    if (!res.ok) return null;
+    
+    if (!res.ok) {
+      console.error(`[GITRANK] Erro da API: Status HTTP ${res.status}`);
+      return null;
+    }
     return res.json();
   } catch (error) {
+    console.error("[GITRANK] 🔥 FALHA CRÍTICA NO FETCH:", error);
     return null;
   }
 }
 
-export default async function ScorePage({ params }: { params: Promise<{ username: string }> }) {
+export const dynamic = 'force-dynamic';
+
+export default async function ScorePage({ params }: { params: { username: string } }) {
   const resolvedParams = await params;
   const username = resolvedParams.username;
   const result = await getScore(username);
@@ -124,7 +132,6 @@ export default async function ScorePage({ params }: { params: Promise<{ username
             
             <h1 className="text-3xl font-black text-white tracking-tight mb-1">@{username}</h1>
             
-            {/* NOVO: Indicação de Idade da Conta */}
             {result.memberSince && (
                <span className="text-zinc-500 text-sm font-medium mb-4 block">Membro desde {result.memberSince}</span>
             )}
