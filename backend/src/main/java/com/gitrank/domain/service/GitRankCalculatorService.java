@@ -23,7 +23,7 @@ public class GitRankCalculatorService {
         if (originalRepos.isEmpty()) {
             return new GitRankResult(
                     0, 
-                    "Inativo", 
+                    "F", 
                     List.of("Nenhum repositório original público encontrado."),
                     "Não foi possível gerar um resumo, pois não existem repositórios originais na conta.",
                     0, 0, 0,
@@ -121,9 +121,15 @@ public class GitRankCalculatorService {
     }
 
     private String determineLevel(int score) {
-        if (score >= 85) return "Excepcional";
-        if (score >= 60) return "Sólido";
-        return "Em Desenvolvimento";
+        if (score >= 95) return "S+";
+        if (score >= 90) return "S";
+        if (score >= 85) return "A+";
+        if (score >= 80) return "A";
+        if (score >= 75) return "B+";
+        if (score >= 70) return "B";
+        if (score >= 60) return "C";
+        if (score >= 50) return "D";
+        return "F";
     }
 
     private void generateInsights(int finalScore, List<String> insights) {
