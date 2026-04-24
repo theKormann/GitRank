@@ -58,7 +58,7 @@ export default function Home() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="github.com/seu-utilizador"
+                placeholder="Digite seu username do GitHub"
                 className="flex-1 bg-transparent px-2 py-3 outline-none text-white font-mono text-base md:text-lg placeholder:text-zinc-500 w-full"
                 required
               />
