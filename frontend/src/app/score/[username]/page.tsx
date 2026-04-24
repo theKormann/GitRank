@@ -3,6 +3,12 @@ import { Metadata } from "next";
 import ShareButton from "../../ShareButton";
 import SupportButton from "@/src/components/SupportButton";
 
+interface Badge {
+  name: string;
+  description: string;
+  unlocked: boolean;
+}
+
 interface GitRankResult {
   finalScore: number;
   level: string;
@@ -11,7 +17,7 @@ interface GitRankResult {
   totalRepos?: number;
   totalStars?: number;
   totalCommits?: number;
-  badges?: string[];
+  badges?: Badge[];
   languages?: Record<string, number>;
   memberSince?: string;
 }
@@ -47,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 }
 
 async function getScore(username: string): Promise<GitRankResult | null> {
-  const apiUrl = process.env.API_URL || 'http://127.0.0.1:8080';
+  const apiUrl = process.env.API_URL || '[http://127.0.0.1:8080](http://127.0.0.1:8080)';
   try {
     const res = await fetch(`${apiUrl}/api/v1/gitrank/${username}`, {
       cache: 'no-store'
@@ -239,16 +245,30 @@ export default async function ScorePage({ params }: { params: { username: string
                     <h3 className="text-lg font-bold text-white">Conquistas</h3>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {result.badges.map((badge, index) => (
                       <div
                         key={index}
-                        className="group relative flex items-center px-4 py-2 rounded-xl bg-gradient-to-b from-zinc-800/80 to-zinc-900 border border-zinc-700/80 shadow-lg hover:border-purple-500/50 transition-all hover:-translate-y-0.5 cursor-default"
+                        className={`group relative flex flex-col p-4 rounded-xl border transition-all ${
+                          badge.unlocked
+                            ? 'bg-gradient-to-b from-purple-500/10 to-zinc-900 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)] hover:border-purple-500/50 hover:-translate-y-0.5 cursor-default'
+                            : 'bg-zinc-900/40 border-zinc-800/80 opacity-60 grayscale cursor-not-allowed'
+                        }`}
                       >
-                        <div className="absolute inset-0 bg-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <span className="relative z-10 text-zinc-200 text-sm font-semibold tracking-wide flex items-center gap-2">
-                          {badge}
-                        </span>
+                        {badge.unlocked && (
+                          <div className="absolute inset-0 bg-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        )}
+                        
+                        <div className="relative z-10 flex items-center gap-2 mb-1">
+                          <span className="text-lg">{badge.unlocked ? '🏆' : '🔒'}</span>
+                          <span className={`text-sm font-bold ${badge.unlocked ? 'text-zinc-200' : 'text-zinc-500'}`}>
+                            {badge.name}
+                          </span>
+                        </div>
+                        
+                        <p className={`relative z-10 text-xs mt-1 ${badge.unlocked ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                          {badge.description}
+                        </p>
                       </div>
                     ))}
                   </div>

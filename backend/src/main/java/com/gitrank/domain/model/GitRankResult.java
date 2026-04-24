@@ -10,7 +10,7 @@ public record GitRankResult(
         Integer totalRepos,
         Integer totalStars,
         Integer totalCommits,
-        List<String> badges,
+        private List<Badge> badges;,
         Map<String, Double> languages,
         String memberSince
 ) {}

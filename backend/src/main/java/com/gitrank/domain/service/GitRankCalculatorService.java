@@ -1,5 +1,6 @@
 package com.gitrank.domain.service;
 
+import com.gitrank.domain.model.Badge;
 import com.gitrank.domain.model.DeveloperProfile;
 import com.gitrank.domain.model.GitRankResult;
 import com.gitrank.domain.model.RepositoryData;
@@ -66,10 +67,11 @@ public class GitRankCalculatorService {
             finalScore >= 60 ? "Demonstra um cuidado excelente com a organização, aplicando descrições claras e boa documentação." : "A análise encontrou espaço para melhorar a documentação técnica (README) dos seus projetos principais."
         );
 
-        List<String> badges = new ArrayList<>();
-        if (finalScore >= 85) badges.add("🏆 Desenvolvedor Excepcional");
-        if (originalRepos.size() >= 10) badges.add("📦 Criador Prolífico");
-        if (totalCommits >= 50) badges.add("🔥 Máquina de Commits");
+        List<Badge> allBadges = new ArrayList<>();
+        allBadges.add(new Badge("🏆 Desenvolvedor Excepcional", "Alcançou a marca de 85 pontos no GitRank.", finalScore >= 85));
+        allBadges.add(new Badge("📦 Criador Prolífico", "Possui 10 ou mais repositórios originais públicos.", originalRepos.size() >= 10));
+        allBadges.add(new Badge("🔥 Máquina de Commits", "Realizou 50 ou mais commits recentes validados.", totalCommits >= 50));
+        allBadges.add(new Badge("🧠 Poliglota", "Escreveu código em 3 ou mais linguagens diferentes.", langByteCount.size() >= 3));
 
         long totalBytes = langByteCount.values().stream().mapToLong(Long::longValue).sum();
         
@@ -91,7 +93,7 @@ public class GitRankCalculatorService {
                 originalRepos.size(),
                 0, 
                 totalCommits,
-                badges,
+                allBadges,
                 languagePercentages,
                 memberSince
         );
