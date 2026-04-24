@@ -32,6 +32,22 @@ const getLanguageColor = (lang: string) => {
   return colors[lang] || '#a1a1aa';
 };
 
+export const getTierColor = (tier: string) => {
+    const styles: Record<string, string> = {
+        'S+': 'text-fuchsia-500 drop-shadow-[0_0_8px_rgba(217,70,239,0.8)] font-black',
+        'S': 'text-fuchsia-400 font-bold',
+        'A+': 'text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.6)] font-bold',
+        'A': 'text-amber-500 font-semibold',
+        'B+': 'text-emerald-400 font-semibold',
+        'B': 'text-emerald-500 font-medium',
+        'C': 'text-sky-500',
+        'D': 'text-slate-400',
+        'F': 'text-red-500 opacity-75',
+    };
+
+    return styles[tier] || 'text-slate-500';
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
   const username = resolvedParams.username;
@@ -53,7 +69,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 }
 
 async function getScore(username: string): Promise<GitRankResult | null> {
-  const apiUrl = process.env.API_URL || '[http://127.0.0.1:8080](http://127.0.0.1:8080)';
+  const apiUrl = process.env.API_URL || 'http://127.0.0.1:8080';
   try {
     const res = await fetch(`${apiUrl}/api/v1/gitrank/${username}`, {
       cache: 'no-store'
@@ -142,8 +158,8 @@ export default async function ScorePage({ params }: { params: { username: string
                <span className="text-zinc-500 text-sm font-medium mb-4 block">Membro desde {result.memberSince}</span>
             )}
 
-            <div className="mt-1 inline-flex items-center px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-              <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent text-sm font-extrabold tracking-widest uppercase">
+            <div className="mt-1 inline-flex items-center px-4 py-1.5 rounded-full border border-zinc-700/50 bg-zinc-800/40 shadow-sm">
+              <span className={`text-sm tracking-widest uppercase ${getTierColor(result.level)}`}>
                 Nível: {result.level}
               </span>
             </div>
