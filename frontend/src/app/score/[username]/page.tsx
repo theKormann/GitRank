@@ -34,15 +34,15 @@ const getLanguageColor = (lang: string) => {
 
 export const getTierColor = (tier: string) => {
     const styles: Record<string, string> = {
-        'S+': 'text-fuchsia-500 drop-shadow-[0_0_8px_rgba(217,70,239,0.8)] font-black',
-        'S': 'text-fuchsia-400 font-bold',
-        'A+': 'text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.6)] font-bold',
-        'A': 'text-amber-500 font-semibold',
-        'B+': 'text-emerald-400 font-semibold',
-        'B': 'text-emerald-500 font-medium',
-        'C': 'text-sky-500',
-        'D': 'text-slate-400',
-        'F': 'text-red-500 opacity-75',
+        'S+': 'text-fuchsia-400 drop-shadow-[0_0_15px_rgba(232,121,249,1)] font-black animate-pulse',
+        'S': 'text-fuchsia-500 drop-shadow-[0_0_12px_rgba(217,70,239,0.9)] font-black',
+        'A+': 'text-amber-300 drop-shadow-[0_0_10px_rgba(252,211,77,0.9)] font-black',
+        'A': 'text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)] font-bold',
+        'B+': 'text-emerald-300 drop-shadow-[0_0_10px_rgba(110,231,183,0.9)] font-bold',
+        'B': 'text-emerald-500 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)] font-bold',
+        'C': 'text-sky-400 drop-shadow-[0_0_5px_rgba(56,189,248,0.6)] font-bold',
+        'D': 'text-slate-300 font-semibold',
+        'F': 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] font-black',
     };
 
     return styles[tier] || 'text-slate-500';
@@ -182,8 +182,11 @@ export default async function ScorePage({ params }: { params: { username: string
                   style={{ strokeDasharray: circumference, strokeDashoffset: strokeDashoffset }}
                 />
               </svg>
-              <div className="flex flex-col items-center justify-center">
-                <span className="text-6xl font-black text-white tracking-tighter">{result.finalScore}</span>
+              <div className="flex flex-col items-center justify-center pt-2">
+                <div className="flex items-start">
+                  <span className="text-6xl font-black text-white tracking-tighter">{result.finalScore}</span>
+                  <span className={`text-4xl ml-1 -mt-1 ${getTierColor(result.level)}`}>{result.level}</span>
+                </div>
                 <span className="text-zinc-500 font-medium text-sm mt-1">/100</span>
               </div>
             </div>
